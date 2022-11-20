@@ -1,14 +1,16 @@
-from machine import Pin
+import board
 import neopixel
 import time
 import random
-from ubot import TelegramLightsSequece
+from tls_class import TelegramLightsSequece
 from project_settings import settings
+import numpy as np
 
-pixel_pin = Pin(settings["pico"]["led_pin"], Pin.OUT)
+pixel_pin = board.D21
 num_pixels = settings["lights"]["number_of_lights"]
+ORDER = neopixel.GRB
 
-pixels = neopixel.NeoPixel(pixel_pin, num_pixels)
+pixels = neopixel.NeoPixel(pixel_pin, num_pixels, brightness=0.2, auto_write=False, pixel_order=ORDER)
 
 
 # pixels.fill((0, 0, 0))
@@ -20,7 +22,7 @@ def show_telegram_sequence(tls: TelegramLightsSequece):
         for light_list in tls.full_sequence:
             for i in range(len(light_list)):
                 pixels[i] = light_list[i]
-            pixels.write()
+            pixels.show()
             time.sleep(tls.display_time)
     except:
         return False
@@ -29,12 +31,12 @@ def show_telegram_sequence(tls: TelegramLightsSequece):
 
 def white():
     pixels.fill((150, 255, 30))
-    pixels.write()
+    pixels.show()
 
 
 def off():
     pixels.fill((0, 0, 0))
-    pixels.write()
+    pixels.show()
 
 
 def rainbow():
@@ -64,7 +66,7 @@ def rainbow():
             for i in range(num_pixels):
                 pixel_index = (i * 256 // num_pixels) + j
                 pixels[i] = wheel(pixel_index & 255)
-            pixels.write()
+            pixels.show()
             time.sleep(wait)
 
     while True:
@@ -80,18 +82,18 @@ def running_lights():
 
     lights = [(0, 0, 0) for i in range(num_pixels)]
     len_sleep = 0.2
-    for i in range(num_pixels/2):
+    for i in range(int(round(num_pixels/2))):
         lights[i] = (255, 0, 0)
         if i > 45:
             lights[i] = (int(255 - (i - 45) / 5 * 255), int((i - 45) / 6 * 255), 0)
 
-    for i in range(num_pixels/2, num_pixels):
+    for i in range(int(round(num_pixels/2)), num_pixels):
         lights[i] = (0, 255, 0)
         if i > 95:
             lights[i] = (int((i - 95) / 5 * 255), int(255 - (i - 95) / 6 * 255), 0)
 
     print(lights)
-    pixels.write()
+    pixels.show()
     time.sleep(len_sleep)
 
     while True:
@@ -99,16 +101,51 @@ def running_lights():
         for i in range(len(lights)):
             pixels[i] = lights[i]
 
-        pixels.write()
+        pixels.show()
         time.sleep(len_sleep)
 
+
+def pulse_random():
+    t = 0
+    num_lights = 20
+    len_pulse = 200
+
+    def percent_pulse(t):
+        return
+
+    def pulses(t):
+        percent = int((np.sin(2 * np.pi * t / 1000) + 1) * 255 / 2)
+        percent = percent / 255
+        # print(percent)
+        return (int(150 * percent), int(255 * percent), int(30 * percent))
+
+    active_lights = random.sample(range(100), num_lights)
+    already_changed = True
+
+    while True:
+        val_pulse = pulses(t)
+        if val_pulse[0] < 5 and not already_changed:
+            active_lights = random.sample(range(100), num_lights)
+            already_changed = True
+            # print(active_lights)
+        if val_pulse[0] > 5:
+            already_changed = False
+
+        for pix in active_lights:
+            pixels[pix] = val_pulse
+        for i in range(100):
+            if i not in active_lights:
+                pixels[i] = (0, 0, 0)
+        pixels.show()
+        # time.sleep(0.01)
+        t = t + 1
 
 def random_colors():
     list_cols = [(random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255)) for i in range(num_pixels)]
     while True:
         for i in range(num_pixels):
             pixels[i] = list_cols[i]
-        pixels.write()
+        pixels.show()
         time.sleep(2)
         list_new_cols = [(random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255)) for i in
                          range(num_pixels)]
@@ -122,11 +159,11 @@ def an_und_aus():
     while True:
         for i in range(num_pixels):
             pixels[i] = ((150, 255, 30))
-            pixels.write()
+            pixels.show()
             time.sleep(0.05)
         for i in range(num_pixels):
             pixels[i] = ((0, 0, 0))
-            pixels.write()
+            pixels.show()
             time.sleep(0.05)
 
 
@@ -152,7 +189,7 @@ def bayern():
         lights[i] = (0, 0, 255)
 
     # print(lights)
-    pixels.write()
+    pixels.show()
     time.sleep(len_sleep)
 
     while True:
@@ -160,7 +197,7 @@ def bayern():
         for i in range(len(lights)):
             pixels[i] = lights[i]
 
-        pixels.write()
+        pixels.show()
         time.sleep(len_sleep)
 
 

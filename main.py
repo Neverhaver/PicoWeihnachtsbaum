@@ -1,44 +1,48 @@
+from telegram.ext import Updater, CallbackContext
+from telegram import Update
 from project_settings import settings, gif_links
 import multiprocessing
 import random
 import logging
-import baum_pico
-import ubot
+import baum
 import giphy
 from time import time, sleep
+from tls_class import TelegramLightsSequece
 
-proc = multiprocessing.Process(target=baum_pico.running_lights, args=())
+proc = multiprocessing.Process(target=baum.running_lights, args=())
 proc.start()
 print('startet')
 
 token = settings["telegram"]["token"]  # telegram bot object
 chat_id = settings["telegram"]["chat_id"]  # chat_id
-bot = ubot.ubot(token=token)
+updater = Updater(token=token, use_context=True)
+
+dispatcher = updater.dispatcher
 headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
 
-def template(chat_origin_id, func, gif, caption):
+def template(update: Update, context: CallbackContext, func, gif, caption):
     global proc
     if proc.is_alive():
         proc.terminate()
-    bot.send_animation(chat_id=chat_origin_id,
-                       animation=gif,
-                       caption=caption)
+    context.bot.send_animation(chat_id=update.effective_chat.id,
+                               animation=gif,
+                               caption=caption)
     proc = multiprocessing.Process(target=func, args=())
     proc.start()
 
 
-def start(chat_origin_id):
-    template(chat_origin_id, baum_pico.white,
+def start(update: Update, context: CallbackContext):
+    template(update, context, baum.white,
              random.choice(gif_links['start']),
              'Weißer Baum')
 
 
-def redgreen(chat_origin_id):
-    template(chat_origin_id, baum_pico.running_lights,
+def redgreen(update: Update, context: CallbackContext):
+    template(update, context, baum.running_lights,
              random.choice(['https://media.giphy.com/media/GepjBlRKsD1uM/giphy.gif',
                             'https://media.giphy.com/media/eIG0HfouRQJQr1wBzz/giphy.gif',
                             'https://media.giphy.com/media/f72BA6kQXT4uQ/giphy.gif',
@@ -48,8 +52,8 @@ def redgreen(chat_origin_id):
              'Rot und Grün läuft')
 
 
-def start_rainbow(chat_origin_id):
-    template(chat_origin_id, baum_pico.rainbow,
+def start_rainbow(update: Update, context: CallbackContext):
+    template(update, context, baum.rainbow,
              random.choice(['https://media.giphy.com/media/f5GyIBXJ3L0DS/giphy.gif',
                             'https://media.giphy.com/media/SKGo6OYe24EBG/giphy.gif',
                             'https://media.giphy.com/media/3o7TKNOYAv36eKJJra/giphy.gif',
@@ -58,16 +62,16 @@ def start_rainbow(chat_origin_id):
              'Regenbogen \U0001F308')
 
 
-def random_pulse(chat_origin_id):
-    template(chat_origin_id, baum_pico.pulse_random,
+def random_pulse(update: Update, context: CallbackContext):
+    template(update, context, baum.pulse_random,
              random.choice(['https://media.giphy.com/media/chhT3mXVWab3jb1m2O/giphy.gif',
                             'https://media.giphy.com/media/xT5LMOnWyP9zZAzVXa/giphy.gif',
                             'https://media.giphy.com/media/26nfoKekcJcS0vImQ/giphy.gif']),
              'Pulsiert')
 
 
-def very_random(chat_origin_id):
-    template(chat_origin_id, baum_pico.random_colors,
+def very_random(update: Update, context: CallbackContext):
+    template(update, context, baum.random_colors,
              random.choice(['https://media.giphy.com/media/zxxXYJqTlpBnO/giphy.gif',
                             'https://media.giphy.com/media/3orif1K3IJuX9UT1ra/giphy.gif',
                             'https://media.giphy.com/media/XBhzUNf7ta00w/giphy.gif',
@@ -75,8 +79,8 @@ def very_random(chat_origin_id):
              'Mehr Farben')
 
 
-def snaking(chat_origin_id):
-    template(chat_origin_id, baum_pico.an_und_aus,
+def snaking(update: Update, context: CallbackContext):
+    template(update, context, baum.an_und_aus,
              random.choice(['https://media.giphy.com/media/QtZKO7mb7ebpC/giphy.gif',
                             'https://media.giphy.com/media/3o72F7JTbNletrGzvO/giphy.gif'
                             'https://media.giphy.com/media/82DloUKOW5A76/giphy.gif',
@@ -84,8 +88,8 @@ def snaking(chat_origin_id):
              'SssssSSSsssSsSSs \U0001F40D')
 
 
-def bayern(chat_origin_id):
-    template(chat_origin_id, baum_pico.bayern,
+def bayern(update: Update, context: CallbackContext):
+    template(update, context, baum.bayern,
              random.choice(['https://media.giphy.com/media/9DgffJbVRdAQeaLlWK/giphy.gif',
                             'https://media.giphy.com/media/3o7TKv9QWAFaac5XnG/giphy.gif',
                             'https://media.giphy.com/media/9DjXWKkutc2x8GtlO1/giphy.gif',
@@ -95,67 +99,56 @@ def bayern(chat_origin_id):
              'Ozapft is')
 
 
-def stop(chat_origin_id):
-    template(chat_origin_id, baum_pico.off,
+def stop(update: Update, context: CallbackContext):
+    template(update, context, baum.off,
              random.choice(gif_links['finish']),
              'Aus und vorbei')
 
 
-last_executed_message = 0
-timestamp_pico_start = time()
+def read_tls(update: Update, context: CallbackContext):
+    tls = TelegramLightsSequece()
+    if not '[' in update.message.text:
+        random_gif_result, _ = giphy.get_gif(update.message.text)
+        context.bot.send_animation(
+            chat_id=update.effective_chat.id,
+            animation=random_gif_result,
+            caption="I did not understand you, so here is a random gif, based on your message",
+        )
+        return
+    checked_message = tls.set_sequece(update.message.text)
+    if isinstance(checked_message, str):
+        context.bot.send_animation(
+            chat_id=update.effective_chat.id,
+            animation=random.choice(gif_links['error']),
+            caption=f"Error: {checked_message}"
+        )
+        return
 
-while True:
-    messages = bot.read_messages()
-    for result in messages:
-        if result['message']['date'] < timestamp_pico_start:
-            continue
-        if int(result['update_id']) < last_executed_message:
-            last_executed_message = int(result['update_id'])
-            message_text = result['message']['text']
-            chat_origin_id = result['message']['from']['id']
+    template(update, context, baum.show_telegram_sequence(checked_message),
+             random.choice(gif_links['start']),
+             'Aus und vorbei')
 
-            if message_text == "/start":
-                start(chat_origin_id)
-                continue
-            elif message_text == "/stop":
-                stop(chat_origin_id)
-                continue
-            elif message_text == "/redgreen":
-                redgreen(chat_origin_id)
-                continue
-            elif message_text == "/rainbow":
-                start_rainbow(chat_origin_id)
-                continue
-            elif message_text == "/randompulse":
-                random_pulse(chat_origin_id)
-                continue
-            elif message_text == "/veryrandom":
-                very_random(chat_origin_id)
-                continue
-            elif message_text == "/snaking":
-                snaking(chat_origin_id)
-                continue
-            elif message_text == "/bayern":
-                bayern(chat_origin_id)
-                continue
 
-            if message_text[0] == '[':
-                tls = ubot.TelegramLightsSequece()
-                checked_message = tls.set_sequece(message_text)
-                if isinstance(checked_message, str):
-                    bot.send_gif(
-                        chat_origin_id,
-                        f"Error: {checked_message}",
-                        random.choice(gif_links['error'])
-                    )
-                continue
+from telegram.ext import CommandHandler, MessageHandler, Filters
+start_baum = CommandHandler('start', start)
+dispatcher.add_handler(start_baum)
+stop_baum = CommandHandler('black', stop)
+dispatcher.add_handler(stop_baum)
+gruenrot_baum = CommandHandler('redgreen', redgreen)
+dispatcher.add_handler(gruenrot_baum)
+rainbow_handler = CommandHandler('rainbow', start_rainbow)
+dispatcher.add_handler(rainbow_handler)
+pulse_handler = CommandHandler('randompulse', random_pulse)
+dispatcher.add_handler(pulse_handler)
+very_random_handler = CommandHandler('veryrandom', very_random)
+dispatcher.add_handler(very_random_handler)
+random_handler = CommandHandler('snaking', snaking)
+dispatcher.add_handler(random_handler)
+bayern_handler = CommandHandler('bayern', bayern)
+dispatcher.add_handler(bayern_handler)
+stop_handler = CommandHandler('stop', stop)
+dispatcher.add_handler(stop_handler)
+message_handler = MessageHandler(Filters.text, callback=read_tls)
+dispatcher.add_handler(message_handler)
 
-            random_gif_result, _ = giphy.get_gif(message_text)
-
-            bot.send_gif(
-                chat_origin_id,
-                "Could not interpret your message as a light-command, so here is a random gif, based on your message",
-                random_gif_result
-            )
-            sleep(1)
-        sleep(1)
+updater.start_polling()
