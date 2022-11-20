@@ -1,6 +1,6 @@
 # Felix´s Weihnachts-Schrank
 
-Felix´s Schrank kann über den Telegram Bot gesteuert werden 
+Felix´s Schrank kann über [den Telegram Bot](https://t.me/FelixsSpassBot) gesteuert werden.
 
 Wenn du eine vorgefertigte Sequenz auf dem Weihnachtsbaum ausführen willst, wähle einen der Befehle aus dem Telegram Bot aus.
 Nachrichten die mit / starten, werden als Befehl interpretiert.
@@ -22,3 +22,6 @@ Licht-Sequenzen bestehen aus verschachtelten Listen, die wie folgt aufgebaut sin
 > Die Anzahl der gesetzten Lampen-Tuple muss immer 100 betragen
 > 
 > Jeder Zeitschritt der Sequenz beträgt 0,05 Sekunden. Soll eine Animation 2 Sekunden dauern, so muss die Sequenz 40 Listen, zu je 100 Lampen mit je 3 Pixel-Werten enthalten.
+
+Adresse des Bots:
+![Bot QR Code](images/qr_tmp.jpg)
