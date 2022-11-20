@@ -13,20 +13,16 @@ ORDER = neopixel.GRB
 pixels = neopixel.NeoPixel(pixel_pin, num_pixels, brightness=0.2, auto_write=False, pixel_order=ORDER)
 
 
-# pixels.fill((0, 0, 0))
-# pixels.show()
-
-
 def show_telegram_sequence(tls: TelegramLightsSequece):
     try:
-        for light_list in tls.full_sequence:
-            for i in range(len(light_list)):
-                pixels[i] = light_list[i]
-            pixels.show()
-            time.sleep(tls.display_time)
+        while True:
+            for light_list in tls.full_sequence:
+                for i in range(len(light_list)):
+                    pixels[i] = light_list[i]
+                pixels.show()
+                time.sleep(tls.display_time)
     except:
-        return False
-    return True
+        pass
 
 
 def white():
@@ -92,7 +88,6 @@ def running_lights():
         if i > 95:
             lights[i] = (int((i - 95) / 5 * 255), int(255 - (i - 95) / 6 * 255), 0)
 
-    print(lights)
     pixels.show()
     time.sleep(len_sleep)
 

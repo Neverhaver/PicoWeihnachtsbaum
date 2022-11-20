@@ -21,7 +21,7 @@ Licht-Sequenzen bestehen aus verschachtelten Listen, die wie folgt aufgebaut sin
 > 
 > Die Anzahl der gesetzten Lampen-Tuple muss immer 100 betragen
 > 
-> Jeder Zeitschritt der Sequenz beträgt 0,05 Sekunden. Soll eine Animation 2 Sekunden dauern, so muss die Sequenz 40 Listen, zu je 100 Lampen mit je 3 Pixel-Werten enthalten.
+> Jeder Zeitschritt der Sequenz beträgt 0,5 Sekunden. Und aufgrund eines Problems mit dem Aufteilen von zu langen Nachrichten, können derzeit nur Sequenzen mit zwei Zeitschritten dargestellt werden, alle anderen erzeugen derzeit viele Error messages-
 
 Adresse des Bots:
 ![Bot QR Code](images/qr_tmp.jpg)

@@ -1,6 +1,6 @@
 from telegram.ext import Updater, CallbackContext
 from telegram import Update
-from project_settings import settings, gif_links
+from project_settings import settings
 import multiprocessing
 import random
 import logging
@@ -35,9 +35,9 @@ def template(update: Update, context: CallbackContext, func, gif, caption):
     proc.start()
 
 
-def start(update: Update, context: CallbackContext):
+def white(update: Update, context: CallbackContext):
     template(update, context, baum.white,
-             random.choice(gif_links['start']),
+             random.choice(giphy.gif_links['white']),
              'Weißer Baum')
 
 
@@ -101,7 +101,7 @@ def bayern(update: Update, context: CallbackContext):
 
 def stop(update: Update, context: CallbackContext):
     template(update, context, baum.off,
-             random.choice(gif_links['finish']),
+             random.choice(giphy.gif_links['finish']),
              'Aus und vorbei')
 
 
@@ -116,22 +116,29 @@ def read_tls(update: Update, context: CallbackContext):
         )
         return
     checked_message = tls.set_sequece(update.message.text)
-    if isinstance(checked_message, str):
+    if checked_message:
         context.bot.send_animation(
             chat_id=update.effective_chat.id,
-            animation=random.choice(gif_links['error']),
+            animation=random.choice(giphy.gif_links['error']),
             caption=f"Error: {checked_message}"
         )
         return
 
-    template(update, context, baum.show_telegram_sequence(checked_message),
-             random.choice(gif_links['start']),
+    template(update, context, baum.show_telegram_sequence(tls),
+             random.choice(giphy.gif_links['start']),
              'Doing what you told me')
 
 
+def random_selected_gif(update: Update, context: CallbackContext):
+    context.bot.send_animation(
+        chat_id=update.effective_chat.id,
+        animation=random.choice(giphy.gif_links['other']),
+        caption="Good choice, here is a gif for you  \U0001F49D",
+    )
+
 from telegram.ext import CommandHandler, MessageHandler, Filters
-start_baum = CommandHandler('start', start)
-dispatcher.add_handler(start_baum)
+weisser_baum = CommandHandler('white', white)
+dispatcher.add_handler(weisser_baum)
 stop_baum = CommandHandler('black', stop)
 dispatcher.add_handler(stop_baum)
 gruenrot_baum = CommandHandler('redgreen', redgreen)
@@ -146,8 +153,8 @@ random_handler = CommandHandler('snaking', snaking)
 dispatcher.add_handler(random_handler)
 bayern_handler = CommandHandler('bayern', bayern)
 dispatcher.add_handler(bayern_handler)
-stop_handler = CommandHandler('stop', stop)
-dispatcher.add_handler(stop_handler)
+gif_handler = CommandHandler('gif', random_selected_gif)
+dispatcher.add_handler(gif_handler)
 message_handler = MessageHandler(Filters.text, callback=read_tls)
 dispatcher.add_handler(message_handler)
 
