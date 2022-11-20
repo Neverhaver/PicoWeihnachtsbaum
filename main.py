@@ -126,7 +126,7 @@ def read_tls(update: Update, context: CallbackContext):
 
     template(update, context, baum.show_telegram_sequence(checked_message),
              random.choice(gif_links['start']),
-             'Aus und vorbei')
+             'Doing what you told me')
 
 
 from telegram.ext import CommandHandler, MessageHandler, Filters
