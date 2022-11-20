@@ -13,7 +13,7 @@ def get_gif(query):
             "q": query,
             "api_key": settings["giphy"]["api_key"],
             "limit": "5",
-            "offset": randint(0, 50)
+            "offset": randint(0, 10)
         })
         gifs = requests.get("".join((url, "?", params)))
 
