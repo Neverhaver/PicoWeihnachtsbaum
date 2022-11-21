@@ -6,7 +6,6 @@ import random
 import logging
 import baum
 import giphy
-from time import time, sleep
 from tls_class import TelegramLightsSequece
 
 proc = multiprocessing.Process(target=baum.running_lights, args=())
@@ -134,7 +133,14 @@ def read_text(update: Update, context: CallbackContext):
 
 def read_file(update: Update, context: CallbackContext):
     tls = TelegramLightsSequece()
-    checked_message = tls.set_sequece(update.message.effective_attachment.get_file().download_as_bytearray().decode("utf-8"))
+    file_text = update.message.effective_attachment.get_file().download_as_bytearray().decode("utf-8")
+    if any(char not in ["[", "]", "(", ")", " ", "\n", ",", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0"] for char in file_text):  # yes, I know, i could not be bothered to work out the regex
+        context.bot.send_animation(
+            chat_id=update.effective_chat.id,
+            animation=random.choice(giphy.gif_links['error']),
+            caption=f"Nice try, but files may only contain brackets, commas, numbers and spaces."
+        )
+    checked_message = tls.set_sequece(file_text)
     if checked_message:
         context.bot.send_animation(
             chat_id=update.effective_chat.id,
