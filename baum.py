@@ -15,12 +15,11 @@ pixels = neopixel.NeoPixel(pixel_pin, num_pixels, brightness=0.2, auto_write=Fal
 
 def show_telegram_sequence(tls: TelegramLightsSequece):
     try:
-        while True:
-            for light_list in tls.full_sequence:
-                for i in range(len(light_list)):
-                    pixels[i] = light_list[i]
-                pixels.show()
-                time.sleep(tls.display_time)
+        for light_list in tls.full_sequence:
+            for i in range(len(light_list)):
+                pixels[i] = light_list[i]
+            pixels.show()
+            time.sleep(tls.display_time)
     except:
         pass
 

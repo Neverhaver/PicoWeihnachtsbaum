@@ -23,8 +23,11 @@ headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
+message_combiner = {}
+
 
 def template(update: Update, context: CallbackContext, func, gif, caption):
+    message_combiner[update.effective_chat.id] = ''  # reset message_combiner, if a function has been called
     global proc
     if proc.is_alive():
         proc.terminate()
@@ -105,7 +108,7 @@ def stop(update: Update, context: CallbackContext):
              'Aus und vorbei')
 
 
-def read_tls(update: Update, context: CallbackContext):
+def read_text(update: Update, context: CallbackContext):
     tls = TelegramLightsSequece()
     if not '[' in update.message.text:
         random_gif_result, _ = giphy.get_gif(update.message.text)
@@ -129,12 +132,28 @@ def read_tls(update: Update, context: CallbackContext):
              'Doing what you told me')
 
 
+def read_file(update: Update, context: CallbackContext):
+    tls = TelegramLightsSequece()
+    checked_message = tls.set_sequece(update.message.effective_attachment.get_file().download_as_bytearray().decode("utf-8"))
+    if checked_message:
+        context.bot.send_animation(
+            chat_id=update.effective_chat.id,
+            animation=random.choice(giphy.gif_links['error']),
+            caption=f"Error: {checked_message}"
+        )
+        return
+
+    template(update, context, baum.show_telegram_sequence(tls),
+             random.choice(giphy.gif_links['start']),
+             'Doing what you told me')
+
 def random_selected_gif(update: Update, context: CallbackContext):
     context.bot.send_animation(
         chat_id=update.effective_chat.id,
         animation=random.choice(giphy.gif_links['other']),
         caption="Good choice, here is a gif for you  \U0001F49D",
     )
+
 
 from telegram.ext import CommandHandler, MessageHandler, Filters
 weisser_baum = CommandHandler('white', white)
@@ -155,7 +174,9 @@ bayern_handler = CommandHandler('bayern', bayern)
 dispatcher.add_handler(bayern_handler)
 gif_handler = CommandHandler('gif', random_selected_gif)
 dispatcher.add_handler(gif_handler)
-message_handler = MessageHandler(Filters.text, callback=read_tls)
+message_handler = MessageHandler(Filters.text, callback=read_text)
 dispatcher.add_handler(message_handler)
+file_handler = MessageHandler(Filters.document, callback=read_file)
+dispatcher.add_handler(file_handler)
 
 updater.start_polling()

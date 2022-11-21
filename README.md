@@ -14,14 +14,18 @@ Licht-Sequenzen bestehen aus verschachtelten Listen, die wie folgt aufgebaut sin
   - [(0, 255, 0), ..., (255, 0, 0)]
 - Da sich die RGB Werte mit der Zeit verändern sollen, müssen diese als Sequenz angegeben werden, z.B. 
   - [[(0, 255, 0), ..., (255, 0, 0)], ..., [(0, 0, 0), ..., (255, 255, 255)]]
-    
+  
+Licht-Sequenzen können am einfachsten als Dateien gesendet werden, da diese nicht in der Zeichenlänge begrenzt sind.
+Der Datei-Typ ist egal, da nur der Inhalt verwendet wird.
+Entspricht der Inhalt nicht dem vorgegebenen Lichchtsequenz-Typ, wird eine Fehlermeldung zurückgegeben.
+
 > :warning: Achtung:
 > 
 > Pixel Werte dürfen nur zwischen 0 und 255 liegen.
 > 
 > Die Anzahl der gesetzten Lampen-Tuple muss immer 100 betragen
 > 
-> Jeder Zeitschritt der Sequenz beträgt 0,5 Sekunden. Und aufgrund eines Problems mit dem Aufteilen von zu langen Nachrichten, können derzeit nur Sequenzen mit zwei Zeitschritten dargestellt werden, alle anderen erzeugen derzeit viele Error messages-
+> Jeder Zeitschritt der Sequenz beträgt 0,05 Sekunden. Und aufgrund eines Problems mit dem Aufteilen von zu langen Nachrichten, können derzeit nur Sequenzen mit zwei Zeitschritten dargestellt werden, alle anderen erzeugen derzeit viele Error messages-
 
 Adresse des Bots:
 ![Bot QR Code](images/qr_tmp.jpg)
